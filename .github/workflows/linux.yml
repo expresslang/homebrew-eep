@@ -21,6 +21,49 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Install x86-64 emulation support on ARM64 runners
+      - name: Install x86-64 emulation support (ARM64 only)
+        if: contains(matrix.os, 'arm')
+        run: |
+          # Install QEMU user-mode emulation first
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static binfmt-support
+
+          # Backup and disable ALL existing source configurations
+          sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+          # Ubuntu 24.04 uses DEB822 format sources that conflict with our arch-specific setup
+          if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+            sudo mv /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sources.bak
+          fi
+
+          # Determine Ubuntu version
+          UBUNTU_VERSION=$(lsb_release -cs)
+
+          # Create new sources.list with ARM64 packages only
+          sudo tee /etc/apt/sources.list > /dev/null << EOF
+          # ARM64 packages from ports.ubuntu.com
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${UBUNTU_VERSION} main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${UBUNTU_VERSION}-updates main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${UBUNTU_VERSION}-backports main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${UBUNTU_VERSION}-security main restricted universe multiverse
+          EOF
+
+          # Add amd64 architecture
+          sudo dpkg --add-architecture amd64
+
+          # Configure amd64 sources (amd64 packages are on archive.ubuntu.com)
+          sudo tee /etc/apt/sources.list.d/amd64.list > /dev/null << EOF
+          # AMD64 packages from archive.ubuntu.com
+          deb [arch=amd64] http://archive.ubuntu.com/ubuntu ${UBUNTU_VERSION} main restricted universe multiverse
+          deb [arch=amd64] http://archive.ubuntu.com/ubuntu ${UBUNTU_VERSION}-updates main restricted universe multiverse
+          deb [arch=amd64] http://archive.ubuntu.com/ubuntu ${UBUNTU_VERSION}-backports main restricted universe multiverse
+          deb [arch=amd64] http://security.ubuntu.com/ubuntu ${UBUNTU_VERSION}-security main restricted universe multiverse
+          EOF
+
+          # Update package lists and install amd64 libraries
+          sudo apt-get update
+          sudo apt-get install -y libc6:amd64
+
       # Install Homebrew on Linux
       - run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
