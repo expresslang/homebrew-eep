@@ -33,15 +33,15 @@ jobs:
       - run: brew update-reset
 
       - name: Add local tap for testing
-        run: brew tap expresslang/eengine $GITHUB_WORKSPACE
+        run: brew tap expresslang/eep $GITHUB_WORKSPACE
 
       - run: |
-          brew install --build-from-source --verbose expresslang/eengine/eengine
+          brew install --build-from-source --verbose expresslang/eep/eep
 
-      - run: which eengine
+      - run: which eep
 
-      - run: eengine --version
+      - run: eep -h
 
-      - run: brew test --verbose expresslang/eengine/eengine
+      - run: brew test --verbose expresslang/eep/eep
 
-      - run: brew uninstall expresslang/eengine/eengine
+      - run: brew uninstall expresslang/eep/eep

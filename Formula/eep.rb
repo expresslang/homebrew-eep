@@ -1,40 +1,57 @@
 # frozen_string_literal: true
 
-class Eengine < Formula
-  desc "Express Engine - EXPRESS language parser and interpreter"
+class Eep < Formula
+  desc "Eurostep EXPRESS Parser (Eep)"
   homepage "https://github.com/expresslang/eep-releases"
-  version "5.2.7"
+  version "1.4.45"
   license "BSD-2-Clause"
 
   on_macos do
-    on_arm do
-      url "https://github.com/expresslang/eep-releases/releases/download/eeng-5.2.7/eengine-5.2.7-mac-arm64-sbcl"
-      sha256 "cb0cb1837d5a8eaf9cc46db9aaa88fdecea90eb20c2b3f845c18bf1f12fa3136"
-    end
-
-    on_intel do
-      url "https://github.com/expresslang/eep-releases/releases/download/eeng-5.2.7/eengine-5.2.7-mac-x86-64-sbcl"
-      sha256 "2f83aada2e4467dcb0f23e5c08388f7a53fe0b521c42e6f01ce97c6c6e217e4c"
-    end
+    # Intel binary works on both Intel and ARM64 (via Rosetta 2)
+    url "https://github.com/expresslang/eep-releases/releases/download/v1.4.45/eep-macos-10.11-x64"
+    sha256 "75244abb3e87db07e0f72c7f296119d56951007f6a833993db5e0079b4d66632"
   end
 
   on_linux do
-    on_intel do
-      url "https://github.com/expresslang/eep-releases/releases/download/eeng-5.2.7/eengine-5.2.7-lnx-x86-64-sbcl"
-      sha256 "27f785b3d2ff21859977c427c5455345bd9f6c6eab75f203e457e6d6f96658ec"
-    end
-
-    on_arm do
-      url "https://github.com/expresslang/eep-releases/releases/download/eeng-5.2.7/eengine-5.2.7-lnx-arm64-sbcl"
-      sha256 "3f595e6c082cb36b7e6b1937150ea9e8edf9b09634a7dcd5c2275bed822c3bc9"
-    end
+    # x86-64 binary works on both x86-64 and ARM64 (via QEMU user-mode emulation)
+    url "https://github.com/expresslang/eep-releases/releases/download/v1.4.45/eep-linux-x64"
+    sha256 "055766308589585932171414721b5151f9c66638ddf52758fc6950098d6ca3b6"
   end
 
   def install
-    bin.install Dir["*"].first => "eengine"
+    bin.install Dir["*"].first => "eep"
+  end
+
+  def caveats
+    on_macos do
+      if Hardware::CPU.arm?
+        <<~EOS
+          This formula installs an Intel binary that runs on Apple Silicon (ARM64)
+          via Rosetta 2. Rosetta 2 will be automatically used if available.
+
+          To install Rosetta 2 if not already installed:
+            softwareupdate --install-rosetta
+        EOS
+      end
+    end
+
+    on_linux do
+      if Hardware::CPU.arm?
+        <<~EOS
+          This formula installs an x86-64 binary that runs on ARM64 systems
+          via QEMU user-mode emulation. Ensure QEMU user-mode is installed:
+
+          On Debian/Ubuntu:
+            sudo apt-get install qemu-user-static
+
+          On Fedora/RHEL:
+            sudo dnf install qemu-user-static
+        EOS
+      end
+    end
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/eengine --version 2>&1", 0)
+    system bin/"eep", "-h"
   end
 end

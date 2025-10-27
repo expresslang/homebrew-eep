@@ -1,40 +1,57 @@
 # frozen_string_literal: true
 
-class Eengine < Formula
-  desc "Express Engine - EXPRESS language parser and interpreter"
+class Eep < Formula
+  desc "Eurostep EXPRESS Parser (Eep)"
   homepage "https://github.com/expresslang/eep-releases"
   version "<%= metadata['version'] %>"
   license "BSD-2-Clause"
 
   on_macos do
-    on_arm do
-      url "<%= metadata['expresslang/eep-releases']['mac-arm64']['url'] %>"
-      sha256 "<%= metadata['expresslang/eep-releases']['mac-arm64']['sha256'] %>"
-    end
-
-    on_intel do
-      url "<%= metadata['expresslang/eep-releases']['mac-x86-64']['url'] %>"
-      sha256 "<%= metadata['expresslang/eep-releases']['mac-x86-64']['sha256'] %>"
-    end
+    # Intel binary works on both Intel and ARM64 (via Rosetta 2)
+    url "<%= metadata['expresslang/eep-releases']['mac-x86-64']['url'] %>"
+    sha256 "<%= metadata['expresslang/eep-releases']['mac-x86-64']['sha256'] %>"
   end
 
   on_linux do
-    on_intel do
-      url "<%= metadata['expresslang/eep-releases']['lnx-x86-64']['url'] %>"
-      sha256 "<%= metadata['expresslang/eep-releases']['lnx-x86-64']['sha256'] %>"
-    end
-
-    on_arm do
-      url "<%= metadata['expresslang/eep-releases']['lnx-arm64']['url'] %>"
-      sha256 "<%= metadata['expresslang/eep-releases']['lnx-arm64']['sha256'] %>"
-    end
+    # x86-64 binary works on both x86-64 and ARM64 (via QEMU user-mode emulation)
+    url "<%= metadata['expresslang/eep-releases']['lnx-x86-64']['url'] %>"
+    sha256 "<%= metadata['expresslang/eep-releases']['lnx-x86-64']['sha256'] %>"
   end
 
   def install
-    bin.install Dir["*"].first => "eengine"
+    bin.install Dir["*"].first => "eep"
+  end
+
+  def caveats
+    on_macos do
+      if Hardware::CPU.arm?
+        <<~EOS
+          This formula installs an Intel binary that runs on Apple Silicon (ARM64)
+          via Rosetta 2. Rosetta 2 will be automatically used if available.
+
+          To install Rosetta 2 if not already installed:
+            softwareupdate --install-rosetta
+        EOS
+      end
+    end
+
+    on_linux do
+      if Hardware::CPU.arm?
+        <<~EOS
+          This formula installs an x86-64 binary that runs on ARM64 systems
+          via QEMU user-mode emulation. Ensure QEMU user-mode is installed:
+
+          On Debian/Ubuntu:
+            sudo apt-get install qemu-user-static
+
+          On Fedora/RHEL:
+            sudo dnf install qemu-user-static
+        EOS
+      end
+    end
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/eengine --version 2>&1", 0)
+    system bin/"eep", "-h"
   end
 end
