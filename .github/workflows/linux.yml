@@ -30,14 +30,20 @@ jobs:
           sudo apt-get install -y qemu-user-static binfmt-support
 
           # Backup and disable ALL existing source configurations
-          sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+          if [ -f /etc/apt/sources.list ]; then
+            sudo mv /etc/apt/sources.list /etc/apt/sources.list.bak
+          fi
           # Ubuntu 24.04 uses DEB822 format sources that conflict with our arch-specific setup
           if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
             sudo mv /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sources.bak
           fi
 
-          # Determine Ubuntu version
-          UBUNTU_VERSION=$(lsb_release -cs)
+          # Determine Ubuntu version (with fallback if lsb_release not available)
+          if command -v lsb_release &> /dev/null; then
+            UBUNTU_VERSION=$(lsb_release -cs)
+          else
+            UBUNTU_VERSION=$(grep UBUNTU_CODENAME /etc/os-release | cut -d= -f2)
+          fi
 
           # Create new sources.list with ARM64 packages only
           sudo tee /etc/apt/sources.list > /dev/null << EOF
