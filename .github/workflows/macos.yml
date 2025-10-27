@@ -1,0 +1,40 @@
+name: macOS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test-macos:
+    name: Install on macOS
+    strategy:
+      fail-fast: false
+      matrix:
+        # macos-13: Intel; macos-14, macos-15: ARM64
+        os: [ macos-15, macos-14, macos-13 ]
+    runs-on: ${{ matrix.os }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ matrix.os }}-${{ github.head_ref || github.ref_name }}'
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: brew update-reset
+
+      - name: Add local tap for testing
+        run: brew tap expresslang/eengine $GITHUB_WORKSPACE
+
+      - run: |
+          brew install --build-from-source --verbose expresslang/eengine/eengine
+
+      - run: brew audit --strict --formula expresslang/eengine/eengine
+        continue-on-error: true
+
+      - run: which eengine
+
+      - run: eengine --version
+
+      - run: brew test --verbose expresslang/eengine/eengine
+
+      - run: brew uninstall expresslang/eengine/eengine

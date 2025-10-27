@@ -1,0 +1,40 @@
+# frozen_string_literal: true
+
+class Eengine < Formula
+  desc "Express Engine - EXPRESS language parser and interpreter"
+  homepage "https://github.com/expresslang/eep-releases"
+  version "<%= metadata['version'] %>"
+  license "BSD-2-Clause"
+
+  on_macos do
+    on_arm do
+      url "<%= metadata['expresslang/eep-releases']['mac-arm64']['url'] %>"
+      sha256 "<%= metadata['expresslang/eep-releases']['mac-arm64']['sha256'] %>"
+    end
+
+    on_intel do
+      url "<%= metadata['expresslang/eep-releases']['mac-x86-64']['url'] %>"
+      sha256 "<%= metadata['expresslang/eep-releases']['mac-x86-64']['sha256'] %>"
+    end
+  end
+
+  on_linux do
+    on_intel do
+      url "<%= metadata['expresslang/eep-releases']['lnx-x86-64']['url'] %>"
+      sha256 "<%= metadata['expresslang/eep-releases']['lnx-x86-64']['sha256'] %>"
+    end
+
+    on_arm do
+      url "<%= metadata['expresslang/eep-releases']['lnx-arm64']['url'] %>"
+      sha256 "<%= metadata['expresslang/eep-releases']['lnx-arm64']['sha256'] %>"
+    end
+  end
+
+  def install
+    bin.install Dir["*"].first => "eengine"
+  end
+
+  test do
+    assert_match version.to_s, shell_output("#{bin}/eengine --version 2>&1", 0)
+  end
+end

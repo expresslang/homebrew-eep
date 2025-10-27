@@ -1,0 +1,47 @@
+name: Linux
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test-linux:
+    name: Install on Linux
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        # Test all Linux platforms
+        os: [ ubuntu-24.04, ubuntu-22.04, ubuntu-24.04-arm, ubuntu-22.04-arm ]
+    concurrency:
+      group: '${{ github.workflow }}-${{ matrix.os }}-${{ github.head_ref || github.ref_name }}'
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install Homebrew on Linux
+      - run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
+          test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.bash_profile
+          echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.profile
+          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+
+      - run: brew update-reset
+
+      - name: Add local tap for testing
+        run: brew tap expresslang/eengine $GITHUB_WORKSPACE
+
+      - run: |
+          brew install --build-from-source --verbose expresslang/eengine/eengine
+
+      - run: which eengine
+
+      - run: eengine --version
+
+      - run: brew test --verbose expresslang/eengine/eengine
+
+      - run: brew uninstall expresslang/eengine/eengine

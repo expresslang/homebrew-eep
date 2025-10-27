@@ -1,0 +1,154 @@
+= Homebrew Tap for Express Engine (eengine)
+:toc:
+:toclevels: 2
+
+== Purpose
+
+This repository provides a Homebrew tap for installing
+https://github.com/expresslang/eep-releases[Express Engine (eengine)]
+on macOS and Linux systems.
+
+Express Engine is an open-source EXPRESS language parser and interpreter
+implemented in Steel Bank Common Lisp (SBCL).
+
+== Installation
+
+=== Add the tap
+
+[source,bash]
+----
+brew tap expresslang/eengine
+----
+
+=== Install eengine
+
+[source,bash]
+----
+brew install eengine
+----
+
+=== Verify installation
+
+[source,bash]
+----
+eengine --version
+----
+
+=== Update to latest version
+
+[source,bash]
+----
+brew upgrade eengine
+----
+
+== Supported Platforms
+
+The formula supports the following platforms:
+
+* macOS (Apple Silicon)
+* macOS (Intel)
+* Linux (x86-64)
+* Linux (ARM64)
+
+The formula automatically detects your platform and installs the appropriate
+binary.
+
+== How It Works
+
+=== Automated Updates
+
+This tap is automatically updated when new eengine releases are published:
+
+1. A new release is created in
+   https://github.com/expresslang/eep-releases[eep-releases]
+2. The release workflow triggers a `repository_dispatch` event to this
+   repository
+3. The `update-formula.yml` workflow runs `generate-formula.rb` to:
+   * Download all platform binaries from the release
+   * Calculate SHA256 checksums
+   * Update `formula-metadata.json`
+   * Generate `Formula/eengine.rb` from the ERB template
+4. A pull request is created with the updated formula
+5. After review and merge, the new version is available via Homebrew
+
+=== Manual Formula Generation
+
+To manually update the formula (for testing or maintenance):
+
+[source,bash]
+----
+# Install dependencies
+bundle install
+
+# Generate formula for a specific version
+bundle exec ruby generate-formula.rb --version eeng-5.2.7
+
+# Dry run (preview changes without writing files)
+bundle exec ruby generate-formula.rb --version eeng-5.2.7 --dry-run
+----
+
+== Repository Structure
+
+[source]
+----
+homebrew-eengine/
+├── .github/workflows/
+│   └── update-formula.yml       # Automated formula update workflow
+├── Formula/
+│   └── eengine.rb               # Generated Homebrew formula
+├── templates/
+│   └── eengine.rb.erb           # ERB template for formula
+├── formula-metadata.json        # Version and SHA256 metadata
+├── generate-formula.rb          # Formula generator script
+├── Gemfile                      # Ruby dependencies
+└── README.adoc                  # This file
+----
+
+== Development
+
+=== Prerequisites
+
+* Ruby 3.2 or later
+* Bundler
+
+=== Setup
+
+[source,bash]
+----
+# Install dependencies
+bundle install
+
+# Set GitHub token for testing (optional)
+export GITHUB_TOKEN=your_token_here
+----
+
+=== Testing
+
+Test the formula locally before publishing:
+
+[source,bash]
+----
+# Install from local tap
+brew install --build-from-source Formula/eengine.rb
+
+# Test the installation
+eengine --version
+
+# Uninstall
+brew uninstall eengine
+----
+
+== Contributing
+
+This repository is primarily maintained through automated workflows. Manual
+updates should only be necessary for:
+
+* Updating the formula template (`templates/eengine.rb.erb`)
+* Modifying the generator script (`generate-formula.rb`)
+* Fixing workflow issues
+
+== License
+
+This tap is provided as-is for distributing eengine via Homebrew. Refer to the
+https://github.com/expresslang/eep-releases[eep-releases repository]
+for license information about eengine itself.
