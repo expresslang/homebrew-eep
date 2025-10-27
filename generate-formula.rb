@@ -18,21 +18,13 @@ end
 class FormulaGenerator
   RESOURCES_AND_TEMPLATES = {
     "expresslang/eep-releases" => {
-      "mac-arm64" => {
-        "type" => "release-artifact",
-        "pattern" => "eengine-*-mac-arm64-sbcl",
-      },
       "mac-x86-64" => {
         "type" => "release-artifact",
-        "pattern" => "eengine-*-mac-x86-64-sbcl",
+        "pattern" => "eep-macos-*-x64",
       },
       "lnx-x86-64" => {
         "type" => "release-artifact",
-        "pattern" => "eengine-*-lnx-x86-64-sbcl",
-      },
-      "lnx-arm64" => {
-        "type" => "release-artifact",
-        "pattern" => "eengine-*-lnx-arm64-sbcl",
+        "pattern" => "eep-linux-x64",
       }
     }
   }
@@ -47,8 +39,8 @@ class FormulaGenerator
   def generate(version:, dry_run: false)
     @dry_run = dry_run
 
-    raise "Version must be specified (e.g. eeng-5.2.7)" unless version
-    raise "Version must match pattern 'eeng-X.Y.Z'" unless version.match?(/^eeng-\d+\.\d+\.\d+/)
+    raise "Version must be specified (e.g. v1.4.45)" unless version
+    raise "Version must match pattern 'vX.Y.Z'" unless version.match?(/^v\d+\.\d+\.\d+/)
 
     puts "Fetching SHA256 hashes for #{version}..."
     results = update_sha256_hashes(version)
@@ -88,7 +80,7 @@ class FormulaGenerator
 
   def update_sha256_hashes(version)
     result = {
-      "version" => version.sub(/^eeng-/, '')
+      "version" => version.sub(/^v/, '')
     }
 
     # Process each resource group
@@ -103,7 +95,7 @@ class FormulaGenerator
         puts "  Processing resource: #{resource_name}"
 
         pattern = resource_info['pattern']
-        # Convert wildcard pattern to regex (e.g., "eengine-*-mac-arm64-sbcl" -> /eengine-.*-mac-arm64-sbcl/)
+        # Convert wildcard pattern to regex (e.g., "eep-macos-*-x64" -> /eep-macos-.*-x64/)
         regex_pattern = pattern.gsub('*', '.*')
         asset = release.assets.find { |a| a.name.match?(/^#{regex_pattern}$/) }
         raise "Asset matching '#{pattern}' not found in release #{version}" unless asset
@@ -180,7 +172,7 @@ if __FILE__ == $0
   OptionParser.new do |opts|
     opts.banner = "Usage: #{$0} [options]"
 
-    opts.on('-v', '--version VERSION', 'Set version number (e.g., eeng-5.2.7)') do |v|
+    opts.on('-v', '--version VERSION', 'Set version number (e.g., v1.4.45)') do |v|
       options[:version] = v
     end
 

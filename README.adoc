@@ -1,15 +1,16 @@
-= Homebrew Tap for Express Engine (eengine)
+= Homebrew Tap for Eurostep EXPRESS Parser (Eep)
 :toc:
 :toclevels: 2
 
 == Purpose
 
-This repository provides a Homebrew tap for installing
-https://github.com/expresslang/eep-releases[Express Engine (eengine)]
+This repository provides a Homebrew tap for installing the
+https://github.com/expresslang/eep-releases[Eurostep EXPRESS Parser (Eep)]
 on macOS and Linux systems.
 
-Express Engine is an open-source EXPRESS language parser and interpreter
-implemented in Steel Bank Common Lisp (SBCL).
+Eep is a command-line tool for working with EXPRESS schemas that enables
+EXPRESS models to be verified against the published EXPRESS language
+(ISO 10303-11:2004 or ISO 10303-11:1994).
 
 == Installation
 
@@ -17,28 +18,28 @@ implemented in Steel Bank Common Lisp (SBCL).
 
 [source,bash]
 ----
-brew tap expresslang/eengine
+brew tap expresslang/eep
 ----
 
-=== Install eengine
+=== Install eep
 
 [source,bash]
 ----
-brew install eengine
+brew install eep
 ----
 
 === Verify installation
 
 [source,bash]
 ----
-eengine --version
+eep -h
 ----
 
 === Update to latest version
 
 [source,bash]
 ----
-brew upgrade eengine
+brew upgrade eep
 ----
 
 == Supported Platforms
@@ -57,7 +58,7 @@ binary.
 
 === Automated Updates
 
-This tap is automatically updated when new eengine releases are published:
+This tap is automatically updated when new Eep releases are published:
 
 1. A new release is created in
    https://github.com/expresslang/eep-releases[eep-releases]
@@ -67,7 +68,7 @@ This tap is automatically updated when new eengine releases are published:
    * Download all platform binaries from the release
    * Calculate SHA256 checksums
    * Update `formula-metadata.json`
-   * Generate `Formula/eengine.rb` from the ERB template
+   * Generate `Formula/eep.rb` from the ERB template
 4. A pull request is created with the updated formula
 5. After review and merge, the new version is available via Homebrew
 
@@ -81,23 +82,23 @@ To manually update the formula (for testing or maintenance):
 bundle install
 
 # Generate formula for a specific version
-bundle exec ruby generate-formula.rb --version eeng-5.2.7
+bundle exec ruby generate-formula.rb --version v1.4.45
 
 # Dry run (preview changes without writing files)
-bundle exec ruby generate-formula.rb --version eeng-5.2.7 --dry-run
+bundle exec ruby generate-formula.rb --version v1.4.45 --dry-run
 ----
 
 == Repository Structure
 
 [source]
 ----
-homebrew-eengine/
+homebrew-eep/
 ├── .github/workflows/
 │   └── update-formula.yml       # Automated formula update workflow
 ├── Formula/
-│   └── eengine.rb               # Generated Homebrew formula
+│   └── eep.rb                   # Generated Homebrew formula
 ├── templates/
-│   └── eengine.rb.erb           # ERB template for formula
+│   └── eep.rb.erb               # ERB template for formula
 ├── formula-metadata.json        # Version and SHA256 metadata
 ├── generate-formula.rb          # Formula generator script
 ├── Gemfile                      # Ruby dependencies
@@ -129,13 +130,13 @@ Test the formula locally before publishing:
 [source,bash]
 ----
 # Install from local tap
-brew install --build-from-source Formula/eengine.rb
+brew install --build-from-source Formula/eep.rb
 
 # Test the installation
-eengine --version
+eep -h
 
 # Uninstall
-brew uninstall eengine
+brew uninstall eep
 ----
 
 == Contributing
@@ -143,12 +144,12 @@ brew uninstall eengine
 This repository is primarily maintained through automated workflows. Manual
 updates should only be necessary for:
 
-* Updating the formula template (`templates/eengine.rb.erb`)
+* Updating the formula template (`templates/eep.rb.erb`)
 * Modifying the generator script (`generate-formula.rb`)
 * Fixing workflow issues
 
 == License
 
-This tap is provided as-is for distributing eengine via Homebrew. Refer to the
+This tap is provided as-is for distributing Eep via Homebrew. Refer to the
 https://github.com/expresslang/eep-releases[eep-releases repository]
-for license information about eengine itself.
+for license information about Eep itself.

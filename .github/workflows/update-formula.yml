@@ -36,10 +36,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           add-paths: |
-            Formula/eengine.rb
+            Formula/eep.rb
             formula-metadata.json
-          commit-message: "chore: update eengine to ${{ github.event.client_payload.version || inputs.version }}"
-          title: "Update eengine formula"
+          commit-message: "chore: update Eep to ${{ github.event.client_payload.version || inputs.version }}"
+          title: "Update Eep formula"
           body: |
             Automated formula update to version **${{ github.event.client_payload.version || inputs.version }}**
 
